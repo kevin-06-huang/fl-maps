@@ -8,12 +8,13 @@ import i18n_ from '/imports/both/i18n/en/map.json'
 // import AttendingButton from './../../../Page/AttendingButton'  <-- currently disabled
 import HoursFormatted from '/imports/client/ui/components/HoursFormatted'
 import * as formatUtils from '/imports/client/utils/format'
+import * as Gravatar from '/imports/client/utils/Gravatar'
 import './styles.scss'
 
 class EventInfo extends Component {
   state = {
     animateOut: false,
-    event: null
+    event: null,
   }
 
   static getDerivedStateFromProps (nextProps, prevState) {
@@ -23,15 +24,15 @@ class EventInfo extends Component {
     if ((!pEvent || pEvent) && nEvent) {
       return { event: nEvent, animateIn: true }
     }
-
     if (pEvent && !nEvent) {
       return { animateOut: true }
     }
 
     return { event: nEvent }
+
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     /*
       Animation managment should probably be done by a dedicated library in the future.
     */
@@ -49,6 +50,7 @@ class EventInfo extends Component {
         })
       }, 1)
     }
+
   }
 
   render () {
@@ -62,6 +64,7 @@ class EventInfo extends Component {
       minimized,
       userLocation,
       history,
+      userGravatar,
       user
     } = this.props
 
@@ -79,6 +82,7 @@ class EventInfo extends Component {
 
     const categories = formatUtils.formatCategories(event.categories)
     const distance = formatUtils.formatMilesFromLocation(userLocation, event.address.location.coordinates)
+    const gravatar = Gravatar.isSpecialCategorySelected(event.categories) ? Gravatar.getGravatar(event.organiser.name, 50) : ''
 
     const minimizedClass = minimized ? 'minimized' : ''
     const activeClass = event ? 'active' : ''
@@ -93,13 +97,15 @@ class EventInfo extends Component {
           <div className='back-btn'>
             <i className='fas fa-long-arrow-alt-left' onClick={this.props.returnToList}/>
           </div>
-          <Button color='secondary' onClick={this.openMoreInfo}>More</Button>
+
         </header>
 
         <div className='first-section'>
+          <img src={gravatar} class="rounded-circle float-right" alt=""/>
           <div className='title'>{event.name}</div>
           <div className='categories'>{categories}</div>
           <div className='distance'>{distance}</div>
+          <Button color='secondary' onClick={this.openMoreInfo} block>More</Button>
           {/*
           <Button color='primary' onClick={this.getDirections}>Get Directions</Button>
           */}
@@ -136,7 +142,7 @@ class EventInfo extends Component {
   openMoreInfo = () => {
     const {
       event,
-      openMoreInfo
+      openMoreInfo,
     } = this.props
 
     openMoreInfo(event)
